@@ -2,9 +2,12 @@
 - [存储引擎](#%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E)
   - [有关的一些命令和操作](#%E6%9C%89%E5%85%B3%E7%9A%84%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4%E5%92%8C%E6%93%8D%E4%BD%9C)
 - [未分类常用命令](#%E6%9C%AA%E5%88%86%E7%B1%BB%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4)
-- [SQL的语法规范](#SQL%E7%9A%84%E8%AF%AD%E6%B3%95%E8%A7%84%E8%8C%83)
+- [SQL](#SQL)
+  - [DQL（Data Query Language）数据查询语言](#DQLData-Query-Language%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80)
+    - [基础查询](#%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2)
 - [数据库（database）](#%E6%95%B0%E6%8D%AE%E5%BA%93database)
   - [默认数据库](#%E9%BB%98%E8%AE%A4%E6%95%B0%E6%8D%AE%E5%BA%93)
+- [细节](#%E7%BB%86%E8%8A%82)
 
 - 启动mysql:
 mysql -h host -P mysqlport -u user -p[直接密码不用空格] 
@@ -31,7 +34,7 @@ mysql  Ver 14.14 Distrib 5.7.29, for Linux (x86_64) using  EditLine wrapper
 #
 # For explanations see
 # http://dev.mysql.com/doc/mysql/en/server-system-variables.html
-
+chongtu
 # This will be passed to all mysql clients
 # It has been reported that passwords should be enclosed with ticks/quotes
 # escpecially if they contain "#" chars...
@@ -173,7 +176,78 @@ default-storage-engine=INNODB 一句`
 | 显示表的结构| desc table_name |
 | 显示版本 | select version() |
 
-# SQL的语法规范
+# SQL
+## DQL（Data Query Language）数据查询语言
+### 基础查询
+- 查询字段
+- 查询常量值
+- 查询表达式
+- 查询函数
+- 起别名
+  - 方式1
+  - 方式2
+- 去重 DISTINCT
+- +号的作用:仅仅只有一个功能运算符,不能字符串拼接
+- 字符串拼接，如果其中有null的元素则整个结果都为null
+- ifnull，判断是否为null，如果为null，返回指定值
+
+```sql
+use myemployees;
+# 查询字段
+SELECT 'lASt_name' FROM employees;
+
+SELECT first_name,email FROM employees;
+
+SELECT * FROM employees;
+
+# 查询常量值
+SELECT 100;
+SELECT 'linqing';
+
+# 查询表达式
+SELECT 19*20;
+
+# 查询函数
+SELECT version();
+SELECT 100%98;
+
+# 起别名
+SELECT 100%98 AS jieguo;
+## 方式1
+SELECT lASt_name AS xing,first_name AS ming FROM employees;
+## 方式2 
+SELECT lASt_name 姓,first_name 名 FROM employees;
+# 别名如果有特殊符号，加双引号
+SELECT salary AS "out put" FROM employees;
+
+# 去重 DISTINCT
+SELECT department_id FROM employees;
+SELECT DISTINCT department_id FROM employees;
+
+# +号的作用:仅仅只有一个功能运算符
+-- 以下执行结果全为0
+SELECT lASt_name+first_name AS 姓名 FROM employees;
+-- 两个都为数值型，做加法运算
+SELECT 100+90;
+-- 其中一方为字符型，字符型转换为数值型，成功则做加法；失败，则字符型数值转换为0；
+SELECT '123'+90;
+SELECT 'john'+90;
+-- 只要其中一方为null，则结果肯定为null
+SELECT null+10;
+
+# 字符串拼接，如果其中有null的元素则整个结果都为null
+SELECT CONCAT('a','b','c');
+SELECT CONCAT(lASt_name,first_name) AS xingming FROM employees;
+
+DESC departments;
+
+# ifnull，判断是否为null，如果为null，返回指定值
+SELECT 
+    IFNULL(commission_pct, 0) AS 奖金率, commission_pct
+FROM
+    employees;
+SELECT CONCAT(`first_name`,',',`phone_number`,',',`manager_id`,',',ifnull(commission_pct,0) AS "output" FROM employees;
+```
 
 # 数据库（database）
 - 显示所有数据库：  
@@ -206,3 +280,8 @@ default-storage-engine=INNODB 一句`
 
 **test**  
 测试用，没有东西
+
+# 细节
+- 着重号  
+``如果与关键字冲突可以用此符号避免冲突
+- 没有字符，只有字符串的概念
