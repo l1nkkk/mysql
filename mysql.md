@@ -9,14 +9,20 @@
     - [日期函数](#%E6%97%A5%E6%9C%9F%E5%87%BD%E6%95%B0)
     - [其它函数](#%E5%85%B6%E5%AE%83%E5%87%BD%E6%95%B0)
     - [流程控制函数](#%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E5%87%BD%E6%95%B0)
-  - [```](#)
     - [总结例子](#%E6%80%BB%E7%BB%93%E4%BE%8B%E5%AD%90)
   - [分组函数](#%E5%88%86%E7%BB%84%E5%87%BD%E6%95%B0)
+    - [分组函数总结案例](#%E5%88%86%E7%BB%84%E5%87%BD%E6%95%B0%E6%80%BB%E7%BB%93%E6%A1%88%E4%BE%8B)
 - [SQL](#SQL)
   - [DQL（Data Query Language）数据查询语言](#DQLData-Query-Language%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80)
     - [基础查询](#%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2)
     - [条件查询](#%E6%9D%A1%E4%BB%B6%E6%9F%A5%E8%AF%A2)
     - [排序查询](#%E6%8E%92%E5%BA%8F%E6%9F%A5%E8%AF%A2)
+  - [分组查询](#%E5%88%86%E7%BB%84%E6%9F%A5%E8%AF%A2)
+    - [分组前筛选](#%E5%88%86%E7%BB%84%E5%89%8D%E7%AD%9B%E9%80%89)
+    - [分组后筛选](#%E5%88%86%E7%BB%84%E5%90%8E%E7%AD%9B%E9%80%89)
+    - [按多个字段分组](#%E6%8C%89%E5%A4%9A%E4%B8%AA%E5%AD%97%E6%AE%B5%E5%88%86%E7%BB%84)
+    - [添加排序](#%E6%B7%BB%E5%8A%A0%E6%8E%92%E5%BA%8F)
+    - [总结案例](#%E6%80%BB%E7%BB%93%E6%A1%88%E4%BE%8B)
 - [数据库（database）](#%E6%95%B0%E6%8D%AE%E5%BA%93database)
   - [默认数据库](#%E9%BB%98%E8%AE%A4%E6%95%B0%E6%8D%AE%E5%BA%93)
 - [细节](#%E7%BB%86%E8%8A%82)
@@ -180,14 +186,14 @@ default-storage-engine=INNODB 一句`
 启动mysql服务：`net start mysql`  
 
 # 未分类常用命令
-| 功能       | 命令                   |
-| ---------- | ---------------------- |
-| 显示数据库 | show databases;        |
-| 显示数据表 | show tables [from db]; |
-| 当前所在库 | select databse         |
-| 显示表的结构| desc table_name |
-| 显示版本 | select version() |
-| 显示字符集 | show variables like ‘%char%’ |
+| 功能         | 命令                         |
+| ------------ | ---------------------------- |
+| 显示数据库   | show databases;              |
+| 显示数据表   | show tables [from db];       |
+| 当前所在库   | select databse               |
+| 显示表的结构 | desc table_name              |
+| 显示版本     | select version()             |
+| 显示字符集   | show variables like ‘%char%’ |
 
 # 常见函数
 调用：`select 函数名(实参列表)[from 表]`  
@@ -311,7 +317,6 @@ select date_format(now(),'%Ynian%cyue%dri') as output;
   end as grade
   from employees;
   ```
------
 
 ### 总结例子
 ```sql
@@ -324,14 +329,84 @@ select concat(last_name,'earns',salary,'monthly but want',salary*3) as "dream sa
 select concat(last_name,'earns',salary,'monthly but want',salary*3) as "dream salary" from employees where salary=24000;
 ```
 ## 分组函数
-  - 处理多行数据，返回一个结果
-  - 做统计使用，又称为统计函数，聚合函数，组函数  
+- 处理多行数据，返回一个结果
+- 做统计使用，又称为统计函数，聚合函数，组函数  
 
+**分类**
+- sum 求和； =》 调用+
+- avg 平均值
+- max 最大值
+- min 最小值
+- count 计算个数
+
+**特点**
+- sum、avg一般用于处理数值型
+- max、min、count可以处理任何类型
+- 所有的分组函数都忽略null值
+- 可以和distinct搭配实现去重
+- count函数详解
+  - MYISAM下，count(*)的效率高，因为内部有一个技术字段，直接返回就是了
+  - 在INNODB存储引擎下，count(*)和count(1)效率差不多，比count(字段)要高一些
+  - 一般count(*)用来统计行数
+- *和分组函数一同查询的字段有限制，**一般要求只能是group by后的字段**。因为分组函数后只有一个值，而其他字段是一组值，所以不管最后显示什么，意义都不大，在8.x版本直接报错。
+
+```sql
+# 基本使用
+select sum(salary) from employees;
+select avg(salary) from employees;
+select min(salary) from employees;
+select max(salary) from employees;
+select count(salary) from employees;
+
+# 判断支持哪些类型
+select sum(last_name) from employees;
+select max(last_name),min(first_name) from employees;
+select max(hiredate),min(hiredate) from employees;
+
+# 是否忽略null值
+select count(commission_pct) from employees;
+select sum(commission_pct) from employees;
+
+# 与distinct搭配
+select sum(distinct salary),sum(salary) from employees;
+select count(distinct salary) from employees;
+
+# count函数的详细介绍
+# -
+select count(salary) from employees;
+
+# -统计行数
+select count(*) from employees;
+
+# -统计1的个数，相当于在一个表中添加一列
+select count(1) from employees;
+
+# 和分组函数一同查询的字段有限制。
+select avg(salary),employee_id from employees;
+
+```
+### 分组函数总结案例
+```sql
+# 查询公司员工工资的最大值，最小值，平均值，总和
+select max(salary).min(salary),round(avg(salary),2),sum(salary) from employee
+
+# 查询员工表中的最大入职时间和最小入职时间的相差天数(DIFFRENCE )
+select datediff(max(hiredate),min(hiredate)) from employees;
+
+# 查询部门编号为90的员工个数
+SELECT COUNT(*)
+FROM employees
+WHERE department_id=90;
+
+# 和我家宝宝在一起的天数
+select datediff(now(),'2019-10-4');
+```
 
 # SQL
 ## DQL（Data Query Language）数据查询语言
 - 基础查询
 - 条件查询
+- 分组查询
 ### 基础查询
 - 查询字段
 - 查询常量值
@@ -363,7 +438,7 @@ SELECT 19*20;
 
 # 查询函数
 SELECT version();
-SELECT 100%98;
+SELECT 100%98;【羽毛球】赵剑
 
 # 起别名
 SELECT 100%98 AS jieguo;
@@ -398,7 +473,7 @@ DESC departments;
 # ifnull，判断是否为null，如果为null，返回指定值
 SELECT 
     IFNULL(commission_pct, 0) AS 奖金率, commission_pct
-FROM
+FROMre
     employees;
 SELECT CONCAT(`first_name`,',',`phone_number`,',',`manager_id`,',',ifnull(commission_pct,0)) AS "output" FROM employees;
 ```
@@ -567,6 +642,151 @@ select last_name,salary from employees where salary not between 8000 and 17000 o
 select * from employees where email like '%e%' order by length(email) desc,department_id asc;
 select concat(last_name,'_',first_name) from employees;
 ```
+
+## 分组查询
+引入：查询每个部门的平均工资，而不是整个公司。可以使用group by 子句将表中的数据分成若干组。  
+**语法：**  
+```sql
+SELECT column, froup_function(column)
+FROM table
+[ WHERE condition ]
+[ GROUP BY group_by_expression ]
+[ ORDER BY column ]
+
+select 分组函数,列(要求出现在group by的后面)
+from 表
+[ where 筛选条件 ]
+group by分组的列表
+[ order by子句 ]
+```
+**注意：**  
+查询列表必须特殊，要求是分组函数和group by后出现的字段
+
+**特点：**
+- 分组查询中的筛选条件分两类　
+  - 分组函数做条件肯定是放在having子句中
+  - 从性能角度，能用分组前筛选的，就优先考虑使用分组前筛选
+
+　
+|            | 数据源         | 位置              | 关键字 |
+| ---------- | -------------- | ----------------- | ------ |
+| 分组前筛选 | 原始表         | group by 子句前面 | where  |
+| 分组后筛选 | 分组后的结果集 | group by 子句后面 | having |
+- group by支持单个字段分组，多个字段分组（多个字段之间用都好隔开没有顺序要求）
+- 也可以添加排序。
+
+### 分组前筛选
+**例子：**
+- 1.查询每个工种的最高工资
+- 2.查询每个位置上的部门个数
+- 添加筛选条件
+  1. 查询邮箱中包含a字符的，每个部门的平均工资
+```sql
+# 1. 查询每个工种的最高工资
+select max(salary),job_id from employees group by job_id;
+
+# 2. 查询每个位置上的部门个数
+select count(*),location_id from employees group by location_id;
+
+# 添加筛选条件re
+# -1. 查询邮箱中包含a字符的，每个部门的平均工资
+
+select avg(salary),department_id from employees where email like '%a%' group by department_id;
+# -2. 查询有奖金的每个领导手下员工的最高工资
+select max(salary),manager_id from employees where commission_pct is not null group by manager_id;
+```
+### 分组后筛选
+例子：
+- 编号大于102的领导手下的最低工资，且最低工资大于5000的员工个数。
+  1. 编号大于102的领导手下的最低工资
+  2. 添加筛选条件：最低工资>5000
+- 按员工姓名的长度分组，查询每一组的员工的个数，筛选员工个数>5的有哪些
+  1. 查询每个长度的员工个数
+  2. 添加筛选条件：筛选员工个数>5
+  
+```sql
+# 编号大于102的领导手下的最低工资，且最低工资大于5000的员工个数。
+# -1.编号大于102的领导手下的最低工资
+select min(salary),manager_id 
+from employees 
+where manager_id>102 
+group by manager_id;
+# -2.添加筛选条件：最低工资>5000
+select min(salary),manager_id 
+from employees 
+where manager_id>102 
+group by manager_id 
+having min(salary)>5000;
+
+# 按员工姓名的长度分组，查询每一组的员工的个数，筛选员工个数>5的有哪些
+# -1.查询每个长度的员工个数
+select count(*),length(last_name) 
+from employees 
+group by length(last_name);
+# -2.添加筛选条件：筛选员工个数>5
+select count(*) c,length(last_name) 
+from employees 
+group by length(last_name)
+having c>5;
+```
+### 按多个字段分组
+案例：  
+- 查询每个部门每个工种的员工的平均工资
+```sql
+select avg(salary),department_id,job_id 
+from employees 
+group by job_id,department_id; 
+```
+
+### 添加排序
+案例：
+- 查询每个部门每个工种的员工的平均工资，并且按平均工资的高低显示
+```sql
+select avg(salary),department_id,job_id 
+from employees 
+group by job_id,department_id 
+order by avg(salary) desc; 
+```
+
+### 总结案例
+- 查询个job_id的员工工资的最大值，最小值，平均值，总和，并按job_id升序
+- 查询员工最高工资和最低工资的差距
+- 查询**各个**管理者手下员工的最低工资，其中最低工资不能低于6000，没有管理者的员工不计算在内
+- 查询所有部门的编号，员工数量和工资平均值，并按平均工资降序
+- 选择具体有各个job_id的员工人数
+
+抓住**各个**这个关键词，就是group by。
+```sql
+# 查询个job_id的员工工资的最大值，最小值，平均值，总和，并按job_id升序
+select max(salary),min(salary),avg(salary),sum(salary),job_id
+from employees
+group by job_id
+order by job_id
+
+# 查询员工最高工资和最低工资的差距
+select max(salary) m,min(salary) n,max(salary) - min(salary)
+from employees;
+
+# 查询各个管理者手下员工的最低工资，其中最低工资不能低于6000，没有管理者的员工不计算在内
+select min(employees.salary),manager_id
+from employees
+where employees.manager_id is not null
+group by employees.manager_id
+having min(employees.salary) > 6000;
+
+# 查询所有部门的编号，员工数量和工资平均值，并按平均工资降序
+select department_id,avg(salary),count(*)
+from employees
+group by department_id
+order by department_id desc;
+
+# 选择具体有各个job_id的员工人数
+select count(*) 个数,job_id
+from employees
+group by job_id;
+
+```
+
 # 数据库（database）
 - 显示所有数据库：  
   `show databases;`
