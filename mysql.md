@@ -3,6 +3,12 @@
   - [有关的一些命令和操作](#%E6%9C%89%E5%85%B3%E7%9A%84%E4%B8%80%E4%BA%9B%E5%91%BD%E4%BB%A4%E5%92%8C%E6%93%8D%E4%BD%9C)
 - [未分类常用命令](#%E6%9C%AA%E5%88%86%E7%B1%BB%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4)
 - [常见函数](#%E5%B8%B8%E8%A7%81%E5%87%BD%E6%95%B0)
+  - [单行函数](#%E5%8D%95%E8%A1%8C%E5%87%BD%E6%95%B0)
+    - [字符函数](#%E5%AD%97%E7%AC%A6%E5%87%BD%E6%95%B0)
+    - [数学函数](#%E6%95%B0%E5%AD%A6%E5%87%BD%E6%95%B0)
+    - [日期函数](#%E6%97%A5%E6%9C%9F%E5%87%BD%E6%95%B0)
+    - [其它函数](#%E5%85%B6%E5%AE%83%E5%87%BD%E6%95%B0)
+    - [流程控制函数](#%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E5%87%BD%E6%95%B0)
 - [SQL](#SQL)
   - [DQL（Data Query Language）数据查询语言](#DQLData-Query-Language%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80)
     - [基础查询](#%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2)
@@ -183,44 +189,22 @@ default-storage-engine=INNODB 一句`
 # 常见函数
 调用：`select 函数名(实参列表)[from 表]`  
 
-分类：
-- 单行函数
-  - 每处理一行的数据，输出一个结果
-  - 分类:
-    - 字符函数
-    1. LENGTH 获取字符串**字节**  
-    2. CONCAT 拼接字符串
-    3. UPPER，LOWER 大小写转换
 
-    4. SUBSTR/SUBSTRING 截取子字符串。字符索引  
-    注：SQL中索引从1开始
-    5. INSTR 返回子串第一次的索引
-    6. TRIM 去除空格，或者指定字符串
-    7. LPAD 用指定的字符实现左填充指定长度
-    8. RPAD 用指定的字符实现右填充指定长度
-    9. REPLACE 替换字符
-    - 数学函数
-    1. ROUND 四舍五入，可以设置保留位数
-    2. CEIL 向上取整，返回>=该参数的最小整数
-    3. FLOOR 向下取整，返回>=该参数的最大整数
-    4. TRUNCATE 截断，小数点后保留几位
-    5. MOD 取余，看被除数，如果是正数，结果就为正。 =》 a = a - a/b*b
-    - 日期函数
-    1. NOW 返回当前系统日期+时间
-    2. CURDATE 返回当前系统日期，不包含时间
-    3. CURTIME 返回当前时间，不包含日期
-    4. YEAD,MONTH,MONTHNAME 可以获取指定的部分，年，月，日，小时，分钟，秒
-    5. str_to_date:将日期格式的字符转换成指定格式的日期(注：业务场景看例子)  
-    6. DATE_FORMATE:日期转，指定的字符串格式
-    ![](pic/WeChat&#32;Image_20200210172131.png)
-    - 其它函数
-    1. SELECT VERSION()
-    2. SELECT DATABASE()
-    3. SELECT USER()
-    - 流程控制函数
-- 分组函数
-  - 处理多行数据，返回一个结果
-  - 做统计使用，又称为统计函数，聚合函数，组函数  
+## 单行函数
+每处理一行的数据，输出一个结果
+  
+### 字符函数
+1. LENGTH 获取字符串**字节**  
+2. CONCAT 拼接字符串
+3. UPPER，LOWER 大小写转换
+
+4. SUBSTR/SUBSTRING 截取子字符串。字符索引  
+注：SQL中索引从1开始
+1. INSTR 返回子串第一次的索引
+2. TRIM 去除空格，或者指定字符串
+3. LPAD 用指定的字符实现左填充指定长度
+4. RPAD 用指定的字符实现右填充指定长度
+5. REPLACE 替换字符
 
 案例--单行函数--字符函数：
 ```sql
@@ -239,6 +223,14 @@ select lpad('aaa',2,'*') xixi;
 select rpad('aaa',12,'*') xixi;
 select replace('aaassss','s','a') xixi;
 ```
+### 数学函数
+1. ROUND 四舍五入，可以设置保留位数
+2. CEIL 向上取整，返回>=该参数的最小整数
+3. FLOOR 向下取整，返回>=该参数的最大整数
+4. TRUNCATE 截断，小数点后保留几位
+5. MOD 取余，看被除数，如果是正数，结果就为正。 =》 a = a - a/b*b
+
+
 案例--单行函数--数学函数：
 ```sql
 select round(1.65);
@@ -249,6 +241,15 @@ select truncate(1.69,1);
 select mod(10,-3);
 select mod(-10,3);
 ```
+### 日期函数
+1. NOW 返回当前系统日期+时间
+2. CURDATE 返回当前系统日期，不包含时间
+3. CURTIME 返回当前时间，不包含日期
+4. YEAD,MONTH,MONTHNAME 可以获取指定的部分，年，月，日，小时，分钟，秒
+5. str_to_date:将日期格式的字符转换成指定格式的日期(注：业务场景看例子)  
+6. DATE_FORMATE:日期转，指定的字符串格式
+![](pic/WeChat&#32;Image_20200210172131.png)
+
 案例--单行函数--日期函数：
 ```sql
 select now();
@@ -263,6 +264,16 @@ select * from employees where hiredate='1992-4-3';
 select * from employees where hiredate=str_to_date('4-3-1992','%c-%d-%Y');
 select date_format(now(),'%Ynian%cyue%dri') as output;
 ```
+### 其它函数
+1. SELECT VERSION()
+2. SELECT DATABASE()
+3. SELECT USER()
+### 流程控制函数
+- 分组函数
+  - 处理多行数据，返回一个结果
+  - 做统计使用，又称为统计函数，聚合函数，组函数  
+
+
 # SQL
 ## DQL（Data Query Language）数据查询语言
 - 基础查询
