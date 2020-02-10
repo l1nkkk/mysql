@@ -9,6 +9,9 @@
     - [日期函数](#%E6%97%A5%E6%9C%9F%E5%87%BD%E6%95%B0)
     - [其它函数](#%E5%85%B6%E5%AE%83%E5%87%BD%E6%95%B0)
     - [流程控制函数](#%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E5%87%BD%E6%95%B0)
+  - [```](#)
+    - [总结例子](#%E6%80%BB%E7%BB%93%E4%BE%8B%E5%AD%90)
+  - [分组函数](#%E5%88%86%E7%BB%84%E5%87%BD%E6%95%B0)
 - [SQL](#SQL)
   - [DQL（Data Query Language）数据查询语言](#DQLData-Query-Language%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80)
     - [基础查询](#%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2)
@@ -269,7 +272,58 @@ select date_format(now(),'%Ynian%cyue%dri') as output;
 2. SELECT DATABASE()
 3. SELECT USER()
 ### 流程控制函数
-- 分组函数
+1. if函数：有点像三元运算符
+2. case函数：switch case的结果(可以当表达式用select显示，也可以通过分装在函数中单独调用)  
+  ```SQL
+  # 方法1
+  case 要判断的字段或表达式  
+  when 常量1 then 要显示的值1或语句1;
+  when 常量2 then 要显示的值2或语句2;
+  ...
+  else 要显示的值n或语句n;
+  end
+  # 方法2
+  case 
+  when 条件1 then 要显示的值1或语句1;
+  when 条件2 then 要显示的值2或语句2;
+  ...
+  else 要显示的值n或语句n;
+  end
+  ```
+  案例  
+  ```sql
+  select salary as initial,department_id,
+  case department_id
+  when 30 then salary*1.1
+  when 40 then salary*1.2
+  when 50 then salary*1.3
+  else salary 
+  end as new
+  from employees;
+
+  # 查询员工工资情况
+  select salary,
+  case
+  when salary>20000 then 'A'
+  when salary>15000 then 'B'
+  when salary>10000 then 'C'
+  else 'D'
+  end as grade
+  from employees;
+  ```
+-----
+
+### 总结例子
+```sql
+select now();
+
+select length(last_name) length,substr(last_name,1,1) initial ,last_name from employees order by initial;
+
+select concat(last_name,'earns',salary,'monthly but want',salary*3) as "dream salary" from employees;
+
+select concat(last_name,'earns',salary,'monthly but want',salary*3) as "dream salary" from employees where salary=24000;
+```
+## 分组函数
   - 处理多行数据，返回一个结果
   - 做统计使用，又称为统计函数，聚合函数，组函数  
 
