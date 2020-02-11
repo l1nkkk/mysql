@@ -17,12 +17,18 @@
     - [基础查询](#%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2)
     - [条件查询](#%E6%9D%A1%E4%BB%B6%E6%9F%A5%E8%AF%A2)
     - [排序查询](#%E6%8E%92%E5%BA%8F%E6%9F%A5%E8%AF%A2)
-  - [分组查询](#%E5%88%86%E7%BB%84%E6%9F%A5%E8%AF%A2)
-    - [分组前筛选](#%E5%88%86%E7%BB%84%E5%89%8D%E7%AD%9B%E9%80%89)
-    - [分组后筛选](#%E5%88%86%E7%BB%84%E5%90%8E%E7%AD%9B%E9%80%89)
-    - [按多个字段分组](#%E6%8C%89%E5%A4%9A%E4%B8%AA%E5%AD%97%E6%AE%B5%E5%88%86%E7%BB%84)
-    - [添加排序](#%E6%B7%BB%E5%8A%A0%E6%8E%92%E5%BA%8F)
-    - [总结案例](#%E6%80%BB%E7%BB%93%E6%A1%88%E4%BE%8B)
+    - [分组查询](#%E5%88%86%E7%BB%84%E6%9F%A5%E8%AF%A2)
+      - [分组前筛选](#%E5%88%86%E7%BB%84%E5%89%8D%E7%AD%9B%E9%80%89)
+      - [分组后筛选](#%E5%88%86%E7%BB%84%E5%90%8E%E7%AD%9B%E9%80%89)
+      - [按多个字段分组](#%E6%8C%89%E5%A4%9A%E4%B8%AA%E5%AD%97%E6%AE%B5%E5%88%86%E7%BB%84)
+      - [添加排序](#%E6%B7%BB%E5%8A%A0%E6%8E%92%E5%BA%8F)
+      - [总结案例](#%E6%80%BB%E7%BB%93%E6%A1%88%E4%BE%8B)
+  - [连接查询](#%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2)
+    - [SQL92标准](#SQL92%E6%A0%87%E5%87%86)
+      - [等值查询](#%E7%AD%89%E5%80%BC%E6%9F%A5%E8%AF%A2)
+      - [非等值连接](#%E9%9D%9E%E7%AD%89%E5%80%BC%E8%BF%9E%E6%8E%A5)
+      - [自连接](#%E8%87%AA%E8%BF%9E%E6%8E%A5)
+    - [SQL99](#SQL99)
 - [数据库（database）](#%E6%95%B0%E6%8D%AE%E5%BA%93database)
   - [默认数据库](#%E9%BB%98%E8%AE%A4%E6%95%B0%E6%8D%AE%E5%BA%93)
 - [细节](#%E7%BB%86%E8%8A%82)
@@ -643,7 +649,7 @@ select * from employees where email like '%e%' order by length(email) desc,depar
 select concat(last_name,'_',first_name) from employees;
 ```
 
-## 分组查询
+### 分组查询
 引入：查询每个部门的平均工资，而不是整个公司。可以使用group by 子句将表中的数据分成若干组。  
 **语法：**  
 ```sql
@@ -675,7 +681,7 @@ group by分组的列表
 - group by支持单个字段分组，多个字段分组（多个字段之间用都好隔开没有顺序要求）
 - 也可以添加排序。
 
-### 分组前筛选
+#### 分组前筛选
 **例子：**
 - 1.查询每个工种的最高工资
 - 2.查询每个位置上的部门个数
@@ -695,7 +701,7 @@ select avg(salary),department_id from employees where email like '%a%' group by 
 # -2. 查询有奖金的每个领导手下员工的最高工资
 select max(salary),manager_id from employees where commission_pct is not null group by manager_id;
 ```
-### 分组后筛选
+#### 分组后筛选
 例子：
 - 编号大于102的领导手下的最低工资，且最低工资大于5000的员工个数。
   1. 编号大于102的领导手下的最低工资
@@ -729,7 +735,7 @@ from employees
 group by length(last_name)
 having c>5;
 ```
-### 按多个字段分组
+#### 按多个字段分组
 案例：  
 - 查询每个部门每个工种的员工的平均工资
 ```sql
@@ -738,7 +744,7 @@ from employees
 group by job_id,department_id; 
 ```
 
-### 添加排序
+#### 添加排序
 案例：
 - 查询每个部门每个工种的员工的平均工资，并且按平均工资的高低显示
 ```sql
@@ -748,7 +754,7 @@ group by job_id,department_id
 order by avg(salary) desc; 
 ```
 
-### 总结案例
+#### 总结案例
 - 查询个job_id的员工工资的最大值，最小值，平均值，总和，并按job_id升序
 - 查询员工最高工资和最低工资的差距
 - 查询**各个**管理者手下员工的最低工资，其中最低工资不能低于6000，没有管理者的员工不计算在内
@@ -787,6 +793,106 @@ group by job_id;
 
 ```
 
+## 连接查询
+**分类：**  
+- 按年代分类：
+  - SQL92标准：仅仅支持内连接
+  - SQL99B标准[推荐]：支持内连接+外连接（左外和右外）+交叉连接
+- 按功能分类：
+  - 内连接
+    - 等值连接
+    - 非等值连接
+    - 自连接
+  - 外连接
+    - 左外连接
+    - 右外连接
+    - 全外连接
+  - 交叉连接
+### SQL92标准
+#### 等值查询
+就是连接条件使用了一个=号
+**案例：**
+- 查询员工名和对应的部门名
+- (为表起别名)查询员工名、工种号、工种名
+  - 注：如果为表起了别名，则查询的字段不能使用原来的表名去限定
+- （加筛选条件）
+  - 查询有奖金的员工名和部门名
+- （可以加分组）
+  - 查询每个城市的部门个数
+  - *查询有奖金的每个部门的部门名和部门的领导编号和该部门的最低工资
+  - *查询每个工种的工种名和员工的个数，并且按员工个数降序
+- (三表连接) 
+  - 查询员工名，部门名和所在的城市
+
+```sql
+# 查询员工名和对应的部门名
+select last_name,department_name 
+from employees,departments 
+where employees.department_id=departments.department_id;
+
+# 查询员工名、工种号、工种名
+select last_name,employees.job_id,job_title 
+from employees,jobs 
+where employees.`job_id`=jobs.`job_id`;
+
+# （加筛选条件）查询有奖金的员工名和部门名
+select last_name,department_name 
+from employees e,departments d 
+where e.department_id=d.department_id and e.commission_pct is not null;
+
+# （可以加分组）查询每个城市的部门个数
+select count(*) 个数,city
+from departments d,locations l
+where d.location_id=l.location_id
+group by city;
+
+# -*查询有奖金的每个部门的部门名和部门的领导编号和该部门的最低工资
+select department_name,d.manager_id
+from departments d,employees e 
+where d.department_id=e.department_id 
+and commission_pct is not null 
+group by department_name,manager_id;
+
+# -查询每个工种的工种名和员工的个数，并且按员工个数降序
+select job_title,count(*) 
+from employees e,jobs j 
+where e.job_id=j.job_id 
+group by job_title 
+order by count(*) desc;
+
+# 三表连接
+# -查询员工名，部门名和所在的城市
+select last_name,department_name,city 
+from employees e,departments d,locations l 
+where e.department_id=d.department_id 
+and d.location_id=l.location_id;
+
+```
+#### 非等值连接
+就是不是通过=使表连起来的了，也不一定是!=。
+**案例：**
+- 查询员工的工资和工资级别
+- 
+```sql
+select salary,grade_level 
+from employees e,jod_grades j 
+where salary between j.lowest_sal and j.highest.sal;
+```
+
+#### 自连接
+相当于等值连接，而等值涉及多个表，自连接只有自己。  
+**示例：**  
+- 员工名和上级的名称
+```sql
+select e.employee_id,e.last_name,m.employee_id,m.last_name 
+from employees e,employees m 
+where e.employee_id=m.manager_id;
+```
+### SQL99
+
+
+1. dwd
+
 # 数据库（database）
 - 显示所有数据库：  
   `show databases;`
@@ -817,8 +923,6 @@ group by job_id;
 保存历史的事件汇总信息，为提供MySQL服务器性能做出详细的判断；
 对于新增和删除监控事件点都非常容易，并可以随意改变mysql服务器的监控周期，例如（CYCLE、MICROSECOND）
 
-**test**  
-测试用，没有东西
 
 # 细节
 - 着重号  
@@ -826,3 +930,4 @@ group by job_id;
 - 没有字符，只有字符串的概念
 - %代表任何一个字符(like中使用居多)
 - 字符型必须用单引号
+- 如果为表起了别名，则查询的字段不能使用原来的表名去限定（注：示例在等值连接那）
